@@ -20,10 +20,10 @@ public class Pojemnik {
     }
 
     synchronized public void wstaw(int liczba, String nazwa, int numer) {
-        while(linkedList.size() == 10){
+        while(linkedList.size() == LIMIT){
             try {
                 wait();
-                System.out.println(" Proces " + nazwa + " czeka z wstawieniem do pojemnika nr " + numer);
+                System.out.println(" W " + nazwa + " czeka z wstawieniem do pojemnika nr " + numer);
             } catch (InterruptedException e) {
             }}
         System.out.println(" [Do pojemnika nr " + numer +" wstawiana jest wartosc: "
