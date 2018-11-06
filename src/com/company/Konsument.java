@@ -1,7 +1,7 @@
 package com.company;
 
 
-public class Konsument extends Thread{
+public class Konsument extends Thread {
     private Pojemnik pojemnik;
     private Pojemnik pojemnik2;
     private String name;
@@ -13,11 +13,12 @@ public class Konsument extends Thread{
     }
 
     public void run() {
+//        for (int i = 1; i <= 10; i++) {
         for (int i = 1; i <= 10; i++) {
             try {
-                Thread.sleep((int) (100 * Math.random()));
+                Thread.sleep((int) (100));
+            } catch (InterruptedException e) {
             }
-            catch (InterruptedException e){ }
             pojemnik.pobierz(name, 1);
             pojemnik2.pobierz(name, 2);
 
