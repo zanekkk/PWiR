@@ -17,25 +17,36 @@ public class Animation extends BasicGame {
     private Image CAULDRON1 = null;
     private Image CAULDRON2 = null;
     private Image CAULDRON3 = null;
-    private Image bluePOTION = null;
-    private LinkedList<Image> potions = new LinkedList<>();
+
+    private LinkedList<Potion> redPotions = new LinkedList<>();
+    private LinkedList<Potion> bluePotions = new LinkedList<>();
+
+    private int time = 0;
+    private int duration = 1000;
 
     private Boolean collides = false;
 
-    public Animation(String title){
+    private float x = 50;
+    private int cauldronNumber = 1;
+
+    public Animation(String title) {
         super(title);
         try {
             prepareGUI();
-        }catch(Exception e){}
+        } catch (Exception e) {
+        }
     }
 
     @Override
     public void init(GameContainer gameContainer) throws SlickException {
-        blueMAGsprite = new SpriteSheet("src/resources/blueMAG.png",75,71);
-        redMAGsprite = new SpriteSheet("src/resources/redMAG.png",75,71);
+        blueMAGsprite = new SpriteSheet("src/resources/blueMAG.png", 75, 71);
+        redMAGsprite = new SpriteSheet("src/resources/redMAG.png", 75, 71);
 
-        blueMAGanimation = new org.newdawn.slick.Animation(blueMAGsprite,400);
-        redMAGanimation = new org.newdawn.slick.Animation(redMAGsprite,350);
+        blueMAGanimation = new org.newdawn.slick.Animation(blueMAGsprite, 400);
+        redMAGanimation = new org.newdawn.slick.Animation(redMAGsprite, 350);
+
+        redPotions.add(new Potion("RED", 1, cauldronNumber));
+        bluePotions.add(new Potion("BLUE", 1, cauldronNumber));
 
         try {
             CAULDRON1 = new Image("src/resources/CAULDRON.jpg");
@@ -50,26 +61,60 @@ public class Animation extends BasicGame {
     public void update(GameContainer gameContainer, int i) throws SlickException {
         blueMAGanimation.update(i);
         redMAGanimation.update(i);
-    }
 
-    @Override
-    public void render(GameContainer container, Graphics g)throws SlickException {
+        System.out.print(i + " ");
 
-        CAULDRON1.draw(650,20);
-        CAULDRON2.draw(650,220);
-        CAULDRON3.draw(650,400);
-//        CAULDRON3.draw(container.getInput().getMouseX(),container.getInput().getMouseY());
-        blueMAGanimation.draw(50,180);
-        redMAGanimation.draw(50,320);
-        g.drawString("Collides: " + collides, 10,25);
+        time += i;
 
-        if(collides){
-            potions.add(new Image("src/resources/redPOTION.jpg"));
-            potions.getFirst().draw(150,150);
+        System.out.println(" " + time);
+        if (time >= duration) {
+            cauldronNumber++;
+
+            redPotions.add(new Potion("RED", redPotions.getLast().getNumber() + 1, cauldronNumber));
+
+            for (int n = 0; n <= redPotions.size() - 1; n++) {
+                choosePlaceByCounter(redPotions, n, 0);
+            }
+
+            if (cauldronNumber == 3) {
+                cauldronNumber = 0;
+            }
+
+
+
+            bluePotions.add(new Potion("BLUE", bluePotions.getLast().getNumber() + 1, cauldronNumber));
+
+            for (int n = 0; n <= bluePotions.size() - 1; n++) {
+                choosePlaceByCounter(bluePotions, n, 30);
+            }
+
+            if (cauldronNumber == 3) {
+                cauldronNumber = 0;
+            }
+            time = 0;
         }
 
 
-        initKonsumentProducent(this);
+
+
+
+
+    }
+
+    @Override
+    public void render(GameContainer container, Graphics g) throws SlickException {
+        drawCOULDRONS();
+        drawMAG();
+
+        for (int i = 0; i <= redPotions.size() - 1; i++) {
+            redPotions.get(i).getImage().draw(redPotions.get(i).getX(), redPotions.get(i).getY(), 0.2f);
+            g.drawString(Integer.toString(redPotions.get(i).getNumber()), redPotions.get(i).getX() + 10, redPotions.get(i).getY() - 20);
+        }
+
+        for (int i = 0; i <= bluePotions.size() - 1; i++) {
+            bluePotions.get(i).getImage().draw(bluePotions.get(i).getX(), bluePotions.get(i).getY(), 0.2f);
+            g.drawString(Integer.toString(bluePotions.get(i).getNumber()), bluePotions.get(i).getX() + 10, bluePotions.get(i).getY() - 20);
+        }
     }
 
     private void prepareGUI() throws SlickException {
@@ -80,41 +125,61 @@ public class Animation extends BasicGame {
         app.start();
     }
 
-    public void setCollides(Boolean collides){
+    public void setCollides(Boolean collides) {
         this.collides = collides;
     }
 
+    public void drawCOULDRONS() {
+        CAULDRON1.draw(650, 20);
+        CAULDRON2.draw(650, 220);
+        CAULDRON3.draw(650, 400);
+    }
 
-    public void putNewPotion(String nazwa) throws SlickException{
-        if(nazwa.equals("RED")){
-            potions.add(new Image("src/resources/redPOTION.jpg"));
-            potions.getFirst().draw(150,150);
+
+    public void drawMAG() {
+        blueMAGanimation.draw(50, 200);
+        redMAGanimation.draw(50, 320);
+    }
+
+    public void choosePlaceByCounter(LinkedList<Potion> potions, int n, int colorMove) {
+        if (potions.get(n).getCounter() == 5) {
+            chooseCauldron(potions, n, colorMove);
+
+        } else if (potions.get(n).getCounter() < 5 && n != 0 && potions.get(n - 1).getCounter() != 1) {
+            potions.get(n).setX((int) (potions.get(n).getX() + 50));
+            potions.get(n).setCounter(potions.get(n).getCounter() + 1);
+
+        } else if (potions.get(n).getCounter() < 5 && n == 0) {
+            potions.get(n).setX((int) (potions.get(n).getX() + 50));
+            potions.get(n).setCounter(potions.get(n).getCounter() + 1);
+
+        } else if (potions.get(n).getCounter() > 5) {
+            potions.get(n).setX(1000);
+            potions.get(n).setY(1000);
+            //  redPotions.remove(n);
+
         }
-
     }
 
+    public void chooseCauldron(LinkedList<Potion> potions, int n, int colorMove) {
+        if (potions.get(n).getCauldronNumber() == 1) {
+            potions.get(n).setGoToCauldron(true);
+            potions.get(n).setX(650 + colorMove);
+            potions.get(n).setY(20);
+            potions.get(n).setCounter(potions.get(n).getCounter() + 1);
 
-    private void initKonsumentProducent(Animation animation){
-        Pojemnik poj1 = new Pojemnik(animation);
-        Pojemnik poj2 = new Pojemnik(animation);
+        } else if (potions.get(n).getCauldronNumber() == 2) {
+            potions.get(n).setGoToCauldron(true);
+            potions.get(n).setX(650 + colorMove);
+            potions.get(n).setY(250);
+            potions.get(n).setCounter(potions.get(n).getCounter() + 1);
 
-        Producent prod = new Producent(poj1, "BLUE", 1);
-        Producent prod2 = new Producent(poj2, "RED",2);
-
-        Konsument kons = new Konsument(poj1 , poj2 ,"Konsument1");
-        Konsument kons2 = new Konsument(poj1, poj2 , "Konsument2");
-        Konsument kons3 = new Konsument(poj1, poj2 ,"Konsument3");
-
-
-
-        prod.start();
-        prod2.start();
-
-        kons.start();
-        kons2.start();
-        kons3.start();
-
+        } else {
+            potions.get(n).setGoToCauldron(true);
+            potions.get(n).setX(650 + colorMove);
+            potions.get(n).setY(400);
+            potions.get(n).setCounter(potions.get(n).getCounter() + 1);
+        }
     }
-
 
 }

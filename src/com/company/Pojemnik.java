@@ -7,9 +7,6 @@ public class Pojemnik {
     private final int LIMIT = 5;   //limit ilosci miejsc wstawianych do tablicy
     private Animation animation;
 
-    public Pojemnik(Animation animation){
-        this.animation = animation;
-    }
 
     synchronized public void pobierz(String nazwa, int numer) {
         while(linkedList.size() == 0){
